@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+  	<title>Some js Libraries</title>
+  	<!-- Load the Paper.js library -->
+<link rel='stylesheet' type='text/css' href='./assets/css/patatap.css'>
+<script type="text/javascript" src="./assets/js/paper-full.js"></script>
+<script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.0.3/howler.js"></script>
+
+
+<!-- Define inlined PaperScript associate it with myCanvas -->
+<script type="text/paperscript" canvas="myCanvas">
+	
+//'event' PARAMETER IS NOT NECESSARY, BUT IT IS USEFUL IF YOU WANT TO KNOW WHAT IS HAPPENING AT THE BACK END.
+//e.g. event.key shows the key stroke.
+
+	var sound1 = new Howl({
+		src : ['sounds/pinwheel.mp3']
+	});
+
+	var sound2 = new Howl({
+		src : ['sounds/moon.mp3']
+	});
+
+	var sound3 = new Howl({
+		src : ['sounds/clay.mp3']
+	});
+
+	var sound4 = new Howl({
+		src : ['sounds/flash1.mp3']
+	});
+
+	var sound5 = new Howl({
+		src : ['sounds/strike.mp3']
+	});
+
+	var sound6 = new Howl({
+		src : ['sounds/pinwheel.mp3']
+	});
+
+	var sound7 = new Howl({
+		src : ['sounds/zig-zag.mp3']
+	});
+
+
+	var soundList = [sound1, sound2, sound3, sound4, sound5, sound6, sound7];
+
+
+	var circles = [];
+
+	var squares = [];
+
+	var triangles = [];
+
+	//For each key press, create a circle at random point
+	tool.onKeyDown = function(event){ 		//OR function onKeyDown(event){}
+		//Identify whether a key in groups of key in pressed
+		var aniSoundChooser1 = "abcdefg".indexOf(event.key);
+		var aniSoundChooser2 = "hijklmnop".indexOf(event.key);
+		//Randomise circle appearance points.
+		//view.size.height and width are the maximum x and y coordinates o the current browser view, if browser minimises, the max will change accordingly.
+		var maxPoint = new Point(view.size.width , view.size.height);
+		//Equal to new Point(Math.random(), Math.random())
+		var randomPoint = Point.random();
+		var point = randomPoint * maxPoint;
+		//e.g. (0.6,0.8) * ( 600, 800)
+		//Will set point to anywhere between (0,0) and (maxWidth,maxHeight)
+		var r = Math.random()*255,
+			g = Math.random()*255,
+			b = Math.random()*255;
+
+		var randomColor = "rgb("+r+","+g+","+b+")";
+		if( aniSoundChooser1 !== -1){
+			soundList[aniSoundChooser1].play();
+			
+			var circle = new Shape.Circle(point,100);
+			circle.fillColor = randomColor;
+			circles.push(circle);
+
+		} else if(aniSoundChooser2 !== -1) {
+			//Random sounds as opposed to preassigned sounds like that on circles.
+			soundList[parseInt(Math.random()*(soundList.length-1))].play();
+			var square = new Path.Rectangle({
+				point : point,
+				size : [50,50],
+				fillColor: randomColor
+			});
+			squares.push(square);
+
+		} else {
+			soundList[parseInt(Math.random()*(soundList.length-1))].play();
+			var triangle = new Path.RegularPolygon({
+			    center: point,
+			    sides: 3,
+			    radius: 50,
+			    fillColor: randomColor
+			});
+
+			triangles.push(triangle);
+		}
+
+		}
+		
+	
+	//This function wille execute for each frame change. The frame change is determined by the browser.
+	function onFrame(event){ 		//OR view.onFrame = function(event){}
+		for(var i = 0; i < circles.length; i++){
+			circles[i].fillColor.hue += 1;
+			circles[i].scale(0.9);
+			if(circles[i].bounds.width < 10){
+				circles[i].remove(); //Frees the object from onFrame manipulation.
+				circles.splice(i,1); //Remove from list.
+				console.log(circles);
+			}
+		}
+		for(var i = 0; i < squares.length; i++){
+			squares[i].fillColor.alpha -= 0.05;
+			squares[i].scale(1.2);
+			if(squares[i].length > 4000){
+				squares[i].remove();
+				squares.splice(i,1);
+				console.log(squares);
+			}
+		}
+		//Constantly changing destination, make triangle vibrate as frequency of frame rate.
+		var destination = Point.random() * view.size;
+		for(var i = 0; i < triangles.length; i++){
+			var distanceFromDest = destination - triangles[i].position;
+			triangles[i].position += distanceFromDest / 40;
+			triangles[i].fillColor -= 0.01;
+			if(distanceFromDest.length < 1 && triangles[i].fillColor.alpha < 0.000001){
+				//Randomising destination
+				triangles[i].remove();
+				triangles.splice(i,1);
+				console.log(triangles);
+			}
+		}
+	}
+	
+</script>
+</head>
+<body>
+	<canvas id="myCanvas" resize></canvas>
+</body>
+</html>

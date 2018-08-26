@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Javascript patterns</title>
+
+		<style type="text/css">
+			body {
+				background: #222930;
+			}
+
+			code {
+				background: black;
+				padding: 0px 5px;
+				color: #a9dfbf;
+			}
+
+			pre {
+/*				tab-size: 2;*/
+				font-size: 14px;
+				width: 70%;
+				margin: 10px auto;
+				padding: 10px;
+				background: black;
+				color: #a9dfbf; 
+				overflow-x: auto; /*Allow horizontal scrolling when overflow*/
+			}
+
+			.sidenav {
+				height: 100%;
+				width: 0px;
+				position: fixed; /*scrolling wont move this bar*/
+				z-index: 1; /*Side bar will not be covered by other elements*/
+				top: 0;
+				left: 0;
+				overflow-x: auto;
+				overflow-y: auto;
+				white-space: nowrap;
+				background: rgba(0,0,0,0.8);
+				padding: 10px 30px;
+				color: #E9E9E9;
+				opacity: 0;
+				font-family: "Courier New";
+				transition: all 0.2s;
+			}
+
+			.sidenav:hover {
+				width: 250px;
+				opacity: 1;
+			}
+
+			.sidenav a {
+				color: #E9E9E9;
+				text-decoration: none; /*Remove link underline*/
+			}
+
+			.sidenav a:hover {
+				color: white;
+			}
+
+			.sidenav ul {
+				font-size: 14px;
+				padding: 15px; /*Reduce list padding*/
+				list-style-type: square;
+				color: #4EB1BA;
+			}
+
+			.sidenav ul a {
+				color: #4EB1BA;
+			}
+
+			.sidenav ol {
+				padding-left: 0px; /*Remove list padding*/
+				padding-bottom: 20px;
+				list-style-type: none; /*No numbering/bullet*/
+			}
+
+			.text-container {
+				width: 85%;
+				margin: 0 auto;
+				font-size: 20px;
+			}
+
+			.chapter-header {
+				font-size: 28px;
+				margin-left: 5%;
+			}
+
+			#main {
+				margin: 0 auto; /*same as sidebar width + padding*/
+				font-family: "Arial";
+				color: rgb(200, 200, 200);
+				background: #222930;
+				padding-bottom: 10%;
+			}
+
+
+			#chapter-display {
+				position: fixed;
+				top: 0;
+				right: 0;
+				width: 35%;
+				height: 30px;
+				background: rgb(0,0,0);
+				opacity: 0.4;
+				line-height: 30px;
+				text-align: center;
+				transition: opacity 0.2s;
+			}
+
+			#chapter-display:hover {
+				opacity: 1;
+			}
+
+			.menu-tab {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 20px;
+				height: 100%;
+				white-space: pre-line;
+				text-align: center;
+				background: rgb(0,0,0);
+				color: white;
+				font-family: "Courier";
+				float: left;
+			}
+
+
+			/*#night-mode {
+				position: fixed;
+				z-index: 1;
+				top: 0;
+				right: 0;
+			}*/
+
+		</style>
+	</head>
+	<body>
+		<div class="menu-tab">
+			<!--content page hover area-->
+			C
+			O
+			N
+			T
+			E
+			N
+			T
+
+			P
+			A
+			G
+			E
+
+		</div>
+		<div class="sidenav">
+			<div class="menu-tab"> 
+				<!--Able to see size tab even when sidebar materialise.-->
+				C
+				O
+				N
+				T
+				E
+				N
+				T
+
+				P
+				A
+				G
+				E
+			</div>
+			<h4>Javascript Patterns</h4>
+			<ol id="content-page">
+				<!--To be built by js-->	
+			</ol>
+		</div>
+
+
+		<div id="main">
+			<div id="chapter-display"></div>
+			<!-- <button id="night-mode" onclick="nightMode()">Night mode</button> -->
+			<h1 class="header chapter-header">Essentials</h1>
+			<div class="text-container">
+				<h4 class="sub-chapter-header header">Objects</h4>
+				<ul>
+					<li>Javascript works heavily with objects</li>
+					<li>Object and arrays are passed by reference in javascript</li>
+				</ul>
+				<h4 class="sub-chapter-header header"> Writing maintainable code </h4>
+				<ul>
+					<li>Important as other people will eventually develop on your code, and code changes fast these days.</li>
+					<li>Easy to debug.</li>
+					<li>Easy to relearn code when needed.</li>
+					<li>Readable, consistent, predictable, well documented.</li>
+				</ul>
+				<h4 class="sub-chapter-header header">Minimizing globals</h4>
+				<ul>
+					<li>Reduce chcances of bugs in other environment</li>
+					<li>PRevent untracable bugs</li>
+					<li>Keeps the global environment clean</li>
+					<pre>
+	impliedGlobal = "no var used"; //antipatern
+	delete impliedGlobal //returns true since it is not a true variable, but just a property of global object. [[DontDelete]] attribute set to false.
+
+	var declaredGlobal = "declared using var" //Property of the global object, but it is a true variable.
+	delete declaredGlobal //Will not delete as [[DontDelete]] attribute set to true.
+		//Variables are stored in VariableObject.
+					</pre>
+					<li> Some times, accidentally forgetting <code>var</code> in an enclosed scope can cause problems as well.</li>
+					<pre>
+	function helloThere(){
+		noVarInFunc = "Even this is an implied global."; //antipattern
+		var localVarInFunc = "ALways remember to use var! Now the variable is local.";
+	}
+					</pre>			
+				</ul>
+				<h4 class="sub-chapter-header header">Accessing global object</h4>
+				<ul>
+					<li>Most broswers use <code>window</code> as a pointer to the global object.</li>
+					<li><code>this</code> can also be used, but it cna be confusing.</li>
+					<pre>
+	var globalObject = (function(){
+		return this;
+		//"this" in this case is refering to the global object
+		//Because "this" in a function will still point to global object
+		//Will discuss about constructors later.
+	})					
+					</pre>
+				</ul>
+				<h4 class="sub-chapter-header header">Single <code>var</code> pattern</h4>
+				<ul>
+					<li>Using single <code>var</code> is enough and convenient.</li>
+					<li>All variables will be shown at the top so you know where to find.</li>
+					<pre>
+	function singleVar(){
+		var randomOne = "whoosh",
+			randomTwo = "Seperated by commas",
+			awesome = "At the top of the function",
+			good = "Easy to find all declared variables",
+			readability = "Know what each variable is for",
+			errorFree = "Prevent errors.",
+			problem = "Scattered var can cause hoisting confusions",
+			bla = {},
+			el = document.getElementById("yo")
+			style = el.style 
+			blabla; //Can declare without value as well.
+	}			
+					</pre>
+					<li>Hoisting</li>
+					<pre>
+	console.log(notHoisted); // ReferenceError
+	console.log(hoisted); //undefined
+
+	var hoisted = "hi";
+	notHoisted = "yo";
+					</pre>
+
+					<li>variables are created on execution, added to VariableObject.</li>
+					<li>But its values are not.</li>
+					<li>When the actual code runs, variables will be already declared, hence no error.</li>
+					<li>//But the values will only be assigned when control reaches that line.</li>
+					<li>//Properties are created only when the control reaches the line calling for it.</li>
+
+				</ul>	
+				<h4 class="sub-chapter-header header"><code>for</code> loops optimisation</h4>	
+				<ul>
+					<li>There are ways to optimise a loop</li>
+					<pre>
+	function badLoop(){
+		var coolArray = [];
+
+		for(var i = 0; i &lt; coolArray.length; i++){
+			console.log(i);
+			//Every loop acceses the .length property!! Slows down alot.
+			//Especially bad for DOM objects, because of the large size and live updating.
+				//HTMLCollections are objects returned by DOM.
+			//i++ not recommended by JSLint. dunno why lols, but use i += 1 instead.
+		}
+	}
+
+	function goodLoop(){
+		var coolArrayAgain = [];
+
+		for(var i = 0, max = coolArrayAgain.length; i &lt; max; i += 1){
+			console.log(i);
+			//Now the .length property is only accessed once, and stored into a variable.
+		}
+	}
+
+	function singleVarLoop(){
+		var notCoolArray = [],
+			max,
+			i;
+
+		for(i = 0, max = notCoolArray.length; i &lt; max; i += 1){
+			console.log(i);
+			//For the sake of single var pattern.
+			//Makes for loop for only this function, cannot copy paste to others.
+		}
+	}
+
+	function optimiseDemLoop(){
+		//This is obsolete, but nice to know.
+			//Readable code is more important.
+		var semiCoolArray = [],
+			i,
+			v;
+
+		for(i = semiCoolArray.length; i -= 1){
+			console.log(i)
+			//Generally counting to 0 is faster.
+			//When value of i hits 0, loop will stop.
+		}
+
+		v = semiCoolArray.length
+		while(v -= 1){
+			console.log(v)
+			//Same concept.
+		}
+	}
+					</pre>
+				</ul>
+				<h4 class="sub-chapter-header header">for-in loops</h4>
+				<ul>
+					<li>Aka enumeration</li>
+					<li>Loops non-Arrays, can loops Arrays, but not recommended due to risk of logical errors</li>
+					<li>Always check with <code>hasOwnProperty()</code> to prevent iteration of non-authentic properties which can be confusing</li>
+					<li><code>hasOwnProperty()</code> not needed, if confident with work, can skip to speed up loops</li>
+					<pre>
+    //Assume we add a method into the prototype of Object
+    var man = {
+    	hands: 2,
+    	leg: 2,
+    	head: 1
+	};
+
+	if(typeof Object.prototype.clone === "undefined") {
+		Object.prototype.clone = function() {
+			//Do something
+		}
+	}
+
+	//Using for-in loop to loop through properties
+	for(var i in man) {
+		console.log(i + ":" + man[i]);
+	}
+
+	/*
+	hands:2
+	leg:2
+	head:1
+	clone:function()
+	*/
+
+	//Use hasOwnProperty() to get only man's authentic properties
+	for(var i in man) {
+		if(man.hasOwnProperty(i)) {
+			console.log(i + ":" + man[i]);
+		}
+	}
+
+	/*
+	hands:2
+	leg:2
+	head:1
+	*/
+
+	//"caching" hasOwnProperty if the list of properties are long
+	var hasOwn,
+		i;
+
+	hasOwn = Object.prototype.hasOwnProperty;
+
+	for(i in man) {
+		if(hasOwn.call(man, i)) {
+			console.log(i ,":", man[i]);
+		}
+	}
+
+	/*
+	hands:2
+	leg:2
+	head:1
+	*/
+
+					</pre>
+				</ul>
+				<h4 class="sub-chapter-header header">Coding conventions</h4>
+				<ul>
+					<li>Tab for every layer of code</li>
+					<pre>
+    function hello(){
+	    var hello = "hello",
+	    	world = "sekai"
+
+	    console.log(hello + world);
+	}
+					</pre>
+					<li>For <code>if, for, else</code> etc, always use curly brace to surround code block related to prevent bugs/confusion</li>
+					<li>Best to open curly brace on the same line as the keyword, to prevent bug such as unexpected <code>return</code> bug.</li>
+					<pre>
+    if(superman === "cool") { //Open on the same line!
+	    console.log("Good stuff");
+	}
+					</pre>
+					<li>White spaces rules can help make code neater</li>
+					<pre>
+	//After semi colon, before and after operators +-*/&lt;&gt;
+    for(var i = 0; i &lt; 10; i += 1) {
+	    console.log(i + 1);
+	}
+
+	//After comas/delimiters
+	var listWosh = ["a", "b", "c"];
+
+	//After colons
+	var randomObject = {a: 1, b: 2};
+
+	//After closed parantheses
+	if(this === true) {
+		console.log("how is this possible");
+	}
+					</pre>
+					<li>For naming, use CamelCase.</li>
+					<pre>
+	//lower camelCase
+	var superMan;
+
+	function binLaden() {}
+
+	//Upper camel case for Constructors
+	var Factory = function() {};
+
+	//ALL CAPS FOR CONSTANTS
+	var PI = 3.1415629535,
+		MY_NAME = "batman";
+
+	//_ to indicate private
+
+	var _secret = "Cant tell";
+
+	function _nopeStillNo() {}
+					</pre>
+					<li>Comments should be succint and describes the function or block of code</li>
+					<li>There are cool API Docs generator out there such as YUIDoc.</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">General Do's</h4>
+				<ul>
+					<li>Minify in production to increase loading speed</li>
+					<li>Run code through JSLint to spot any potential errors or anti-patterns</li>
+					<li>Avoid <code>eval()</code> security reasons. If really need it, enclose it in a function to prevent it for pollutiont he global environment</li>
+					<li>Using a <code>Function</code> constructor is almost like using <code>eval()</code>, but it cannot affect the global environment.</li>
+					<li>When passing functions to <code>setTimeout</code>, do not use string. Pass the function itself.</li>
+					<li>Avoid implied typecasting. Use <code>===</code> instead of <code>==</code>.</li>
+					<li>Parse numbers with <code>Number()</code> cosntructor or <code>+"1234"</code> instead of <code>parseInt()</code> for better performance. However, <code>parseInt()</code> needs to be used when there are non-numbers inside the string.</li>
+				</ul>
+			</div>
+
+			<h1 class="header chapter-header">Literals and Constructors</h1>
+			<div class="text-container">
+				<h4 class="sub-chapter-header header">Object literal</h4>
+				<ul>
+					<li>Literal means something like the pure form of something</li>
+					<li>In this case, pure form of Object is <code>{}</code>.</li>
+					<li>Functions assigned as a property of an object are called methods</li>
+
+					<pre>
+    var objectLiteral = {};  //This is not completely empty! Properties are inherited from Object.prototype.
+
+    var anotherObjectLiteral = {
+        name: "Properties can be defined",
+        cool: funcAsWell() {
+	        console.log("kewl");
+	        console.log(this.name);
+
+	        //this refers to the object that it is in.
+	    }
+    };
+
+    //Adding properties to objects
+    objectLiteral.description = "Object literals are simply and awesome.";
+
+
+    //Removing a property
+    delete objectLiteral.cool;  //Removes the method.
+
+					</pre>
+
+					<li>Built-in object constructor <code>Object()</code> is not preferred</li>
+					<li>But there is one feature. The constructor will return different results instead of an Object</li>
+
+					<pre>
+    var number = new Object(2);  //This is a Number!
+
+    var string = new Object("hello"); //This is a String!
+
+    var boolean = new Object(false); //This is a Boolean!
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Custom constructors</h4>
+				<ul>
+					<li>Fun part is here! Custom constructors are very useful for creating your own objects.</li>
+					<li><code>new</code> keyword is used often here.</li>
+					<li><strong>If <code>new</code> is not used, then <code>this</code> will refer to the global object.</strong> ie.<code>window</code> for most browsers.</li>
+
+					<pre>
+    function Person(name) {
+	    this.name = name;
+	    this.say = function() {
+		    return "I am " + this.name;
+		}
+	}
+
+	var coolPerson = new Person("Jeff");
+
+	var hisResponse = coolPerson.say();
+
+	console.log(hisRepsonse); //"I am Jeff";
+					</pre>
+					<li><code>this</code> refers to the empty object implicitly created upon usage of <code>new</code>.</li>
+					<li>It is <strong>automatically returned. Unless otherwise written by the programmer.</strong></li>
+					<br>
+					<li>The empty object inherited the <code>prototype</code> of the function. <code>Person.prototype</code></li>
+					<li>This process of using <code>new</code> produces the same result as the constructor below:</li>
+
+					<pre>
+    function Person(name) {
+	    var this = {};
+
+	    this.name = name;
+	    this.say = function() {
+		    return "I am " + this.name;
+		}
+
+		return this;
+	}
+					</pre>
+
+					<li>This way of doing, however, do not allow the object to inherit the <code>Person.prototype</code>.</li>
+					<li>To allow the object to inherit <code>Person.prototype</code>, use <code>var this = Object.create(Person.prototype);</code></li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Enforcing <code>new</code></h4>
+				<ul>
+					<li>To make sure the constructors returns the correct object despite not using <code>new</code></li>
+					<pre>
+    function Cookie(flavor, ingredient) {
+
+	    //check if "this" is the correct object
+	    if(!(this instanceof Cookie)) {
+		    return new Waffle();  //Invoke itself, now with "new"
+		}
+
+		this.flavor = flavor;
+		this.ingredient = ingredient;
+	}						
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Array literals</h4>
+				<ul>
+					<li><strong>REMINDER: Array is an object as well, just like functions</strong></li>
+					<li>From our understanding of literals, an Array literal would be <code>[]</code></li>
+
+					<pre>
+    var arrayLiteral = [];
+
+    var notEmptyArrayLiteral = [2, 3, "wosh", {weee: wooo}];					
+					</pre>
+					<li>Again, Array constructor is an antipattern.</li>
+					<li>It can accept an integer and creats and Array of the length = that integer</li>
+					<pre>
+    var emptyArray = new Array(5);  //Yes it is empty
+
+    console.log(emptyArray.length);   //But it has length of 5. The items inside are undefined.
+
+    var errorArray = new Array(2.232); //RangeError : invalid array length.
+
+					</pre>
+
+					<li>Not as useful as it may seems, it can be used to generate long strings of whitespace.</li>
+
+					<pre>
+    var longEmptyString = new Array(100).join(" ");
+
+    //Literally joining 100 undefined with whitespaces, hence 99 whitespaces are produced.
+					</pre>
+				</ul>
+				<h4 class="sub-chapter-header header">Checking for Array</h4>
+				<ul>
+					<li>Array is an Object, therefore, it may be hard more people to check if an Array is really an Array</li>
+					<li>Luckily, from ES5 onwards, we have <code>Array.isArray()</code> checker.</li>
+
+					<pre>
+    var trueArray = [];
+
+    console.log(Array.isArray(trueArray)); //true
+
+					</pre>
+					<li>If we do not have <code>Array.isArray()</code>, no worries, we can create our own!</li>
+					<pre>
+    var arrayChecker = function(arr) {
+
+	    var stringOutput = Object.prototype.toString.call(arr);
+
+	    if(stringOutput === "[object Array]") {  // [object Object] will be the output if it is an object, but not array
+		    return true;
+		} else {
+			return false;
+		}
+	}						
+					</pre>
+				</ul>
+				<h4 class="sub-chapter-header header">JSON</h4>
+				<ul>
+					<li>JSON means <strong>Javascript Object Notation</strong></li>
+					<li>Popular format of transmitted data, taking over XML</li>
+					<pre>
+    { "name" : "noname" } //Properties are quoted as well.
+
+    '{ "name" : "noname" }' //JSON string
+					</pre>
+					<li>Do not use <code>eval()</code> to evaluate JSON string into Javascript Objects!!</li>
+					<li>use <code>JSON.parse()</code>. To stringify it back to JSON string, use <code>JSON.stringify()</code> </li>
+					<pre>
+    var jsonObject = JSON.parse('{ "name" : "noname" }');
+
+    var backToJsonString = JSON.stringify(jsonObject);
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Regular Exression Literals</h4>
+				<ul>
+					<li>Even cooler stuff.</li>
+					<li>Basic syntax : <code>/pattern/options</code></li>
+					<li>Has RegExp constructor, but not recommended due to the fuss it brings</li>
+					<pre>
+    var expression = /[^a-Z]/gi;    //an Object as well.
+
+    // From a to uppercase Z
+    //g refers to global, means to search throughout.
+    //i refers to case insensitive.
+
+    //m will refer to multiline, but in this case, it is not used.
+					</pre>
+					<li>There are many syntax for different expressions and sequences, GOOGLE</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Primitive Wrappers</h4>
+				<ul>
+					<li>Primitive types are not Objects</li>
+					<li>But creating a data using primitive wrappers will produce an Object!</li>
+					<li>Primitive wrappers are <code>Number(), String(), Boolean()</code></li>
+					<pre>
+    var numberType = 5;
+
+    var numberObject = new Number(5);
+
+    var numberAgain = Number(5); //Without new, the wrapper will convert number to primitive type.
+
+					</pre>
+					<li>Even though primitive types are not objects, they can seem to have methods of their Object version</li>
+					<pre>
+    var randomString = "superman";
+
+    console.log("superman".toUpperCase());
+
+					</pre>
+					<li>How?? Because the primitive type is temporary converting into an Object, and the method is applied.</li>
+					<li>In the example above. The data is covnerted in a String object, then back to primitive.</li>
+					<li>So does primitive types actually behave like can object?</li>
+					<pre>
+    var string = "Cool";
+
+    string.moreCooler = "super very fast";  // Not an error because of the temporary conversion to acommodate the property assignment.
+
+    console.log(string.moreCooler); //undefined, so nope, primitive is still not an object.
+
+					</pre>
+				</ul>
+				<h4 class="sub-chapter-header header">Error Objects</h4>
+				<ul>
+					<li>Error are objects as well!!!</li>
+					<li>Of course, they have their own constructors, e.g. <code>Error(), TypeError(), SyntaxError()</code></li>
+					<li>And again, they are not recommended.. Due to lack of flexibility.</li>
+					<li>But with <code>new</code> or without, Error constructors return the same object.</li>
+					<li>Use Error object literals!</li>
+					<pre>
+    try {
+    	//Your code here. If something bad happens, throw the error
+	    throw{
+		    name: "ErrorTypeHere",       //Always have when created by Error constructors
+		    message: "To send to user",  //Always have when created by Error constructors
+		    extra: "Shyt why got error one",
+		    line: "Error at line 143",
+		    remedy: gracefulErrorHandler
+		}
+
+	} catch(err) {
+		alert(err.message); //"To send to user"
+
+		err.remedy(); //calls dem gracefulErrorHandler
+		
+	}					
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Try to use literals</h4>
+				<ul>
+					<li>Use literals rather than built-in constructors. unless cannot be helped</li>
+				</ul>
+			</div>
+
+			<h1 class="chapter-header header">Functions</h1>
+			<div class="text-container">
+				<h4 class="sub-chapter-header header">Functions in javascript</h4>
+				<ul>
+					<li>Functions in javascript are objects</li>
+					<li>They can have their own properties and their own methods</li>
+					<li>They can be created dynamically during execution(At runtime)</li>
+					<li>Can be stored in a variable and modified.</li>
+					<li>Can be passed through another function as argument(e.g. callback)</li>
+					<li>A function can also return another function, because it is an object as well</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Function expression and declaration</h4>
+				<ul>
+					<li>There are 2 common ways to declare a function</li>
+					<li>Via function expression</li>
+					<pre>
+    //Named function expression
+
+    var funcVar = function funcName(arg) {
+	    //blablabla
+	}
+
+	//Anonymous function
+
+	var funcVar2 = function(arg) {
+		//blablabla2
+	}
+
+	//Function passed as args are also function expressions
+
+	realFunc(function (args) {
+		//blablabla
+	});
+				</pre>
+					<li>Anonymous functions are often used in function expressions and callbacks</li>
+
+					<li>Another way is via function declaration</li>
+					<pre>
+	function funcName(arg) {
+		//blablabla
+	}	
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Function "name" property and hoisting</h4>
+				<ul>
+					<li>The name of the function can be obtained throug the <code>name</code> property of the function</li>
+					<pre>
+    var funcVar = function namedFunc(arg) {
+	    //blablabla
+	}
+
+	console.log(funcVar.name); //Gets "namedFunc"
+					</pre>
+
+					<li>For hoisting, the variable holding the function will be hoisted, but its "value", which is the function, will not be hoisted</li>
+					<li>Function declaration will be hoisted, name and definition</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Callbacks and scope</h4>
+				<ul>
+					<li>When using <code>this</code> in a callback passed to a global function, <code>this</code> will refer to the global object.</li>
+					<li>However, if <code>this</code> is used in a method of an object, then <code>this</code> will be refering to the object</li>
+					<pre>
+    function globalFunc(callback) {
+	    callback("randomArg");
+	}
+
+	var myObj = {};
+	myObj.name = "bla";
+	myObj.methodToBePassed = function (arg) {
+		this.name = arg;
+	}
+
+
+	//Passing the method as an argument of a global function
+	globalFunc(myObj.methodToBePassed); //The "this" will refer to global object.
+
+	//Running the method itself
+	myObj.methodToBePassed("yoyoyo"); // "this" will be refering to myObj
+
+					</pre>
+					<li>Callbacks are very powerful in javascript</li>
+					<li>They are used to deal with asynchronous functions and event listeners</li>
+					<li>They are also used widely in libraries in npm</li>
+					<li>But beware of callback hell</li>
+					<li>Async-await can be used in place of callbacks, see trello for info</li>
+
+				</ul>
+
+				<h4 class="sub-chapter-header header">Self-defining functions</h4>
+				<ul>
+					<li>Functions can redefine themselves after first execution via function expressions</li>
+					<pre>
+    var myFunc = function() {
+	    console.log("hello");
+
+	    myFunc = function() {
+		    console.log("i changed!");
+		}
+	}
+
+	myFunc(); //hello
+	myFunc(); //i changed!
+					</pre>
+					<li>It is useful for having a function do 2 different things!</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Immediate functions</h4>
+				<ul>
+					<li>Useful for initialisation of application</li>
+					<li>Useful for creating a local scope to prevent certain functions or variables to be exposed to the global scope</li>
+					<pre>
+    (function immediateFunc() {
+	    console.log("executed, no questions asked");
+	}());
+					</pre>
+					<li>Can have parameters</li>
+					<pre>
+    (function immediateFunc(arg) {
+	    console.log("executed, no questions asked");
+	}("yyoyooyoy"));	
+					</pre>
+					<li>Just like any normal functions, it can return objects, primitive types, array and functions.</li>
+
+				</ul>
+
+				<h4 class="sub-chapter-header header">Immediate object initialisation</h4>
+				<ul>
+					<li>There is no special built-in methods called <code>init</code></li>
+					<li>Simply create one yourself and make it do the essential stuff</li>
+					<li>Used to initialise the application as well, the object will not be used after that</li>
+					<pre>
+    ({
+	    var var1 = 123,
+	    	var2 = 342;
+
+	    compileStuff: function(stuff) { 
+		    var result;
+		    //do things here
+		    return result;
+		}
+		
+		init: function() {
+			console.log(this.compileStuff());
+			//more init codes
+		}
+
+	}).init();
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Init-time branching</h4>
+				<ul>
+					<li>For variables that will not be changes during the runtime of the application, it is better to check and capture that variable once, and use it throughout, rather then continuously checking which variable it is during runtime.</li>
+					<li>Exmaple: Different browser has different ways of dealing with event listeners. And the browser will not likely to change during a runtime.(ie. one browser tab). Therefore, capture which browser it is just once. and use that variable</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Memoization pattern</h4>
+				<ul>
+					<li>Some processes takes alot of processing power</li>
+					<li>Therefore, caching the result is sometimes feasible</li>
+					<li>Created an object as a property of the function and store the cache there</li>
+					<pre>
+    var myFunc = function(arg) {
+	    if(!myFunc.myCache["dataToStore"]) {
+		    var result = {}; //For the data
+
+		    //...Expensive operation...
+
+		    myFunc.myCache["dataToStore"] = result;
+		}
+		return myfunc.myCache["dataToStore"];
+	}
+
+	//Creating the cache stoage first
+	myFunc.myCache = {};
+
+	var dataVar = myFunc("argRequired"); // result is cached.
+
+	var dataVar2 = myFunc("argRequired"); // No need to run the expensive process again!
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Configuration objects</h4>
+				<ul>
+					<li>Used to deal with large number of parameters</li>
+					<pre>
+    //This can be nightmare
+
+    function longParams(a, b, c, d, e, f, g, h, i) {
+    	//.....
+    	//use a
+    	//use b
+    	//use b
+    	//.....
+    }
+    //Besides the large number of params, when invoking the function,
+    //	the programmer must remember the positions of the arguments!
+
+    //Why not do this
+
+    var config = {
+	    a: 2,
+	    b: 2,
+	    c: 2,
+	    d: 2,
+	    e: 2
+	}
+
+	//No need to remember positions
+	function function(configObj) {
+		//...
+		//use configObj.a
+		//use configObj.d
+		//use configObj.b
+		//use configObj.c
+	}
+
+				</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Currying functions</h4>
+				<ul>
+					<li>Used when you are passing pretty much the same arguments to a function many many times</li>
+					<li>Currying allows you to slowly "slot" in arguments rather than passing all the required arguments at once</li>
+					<li>It can be done in such a way that only when all the required arguments are added, the output will be produced</li>
+					<pre>
+    var uncurried = function(a, b) {
+	    console.log(a + b);
+	}
+	
+	var curryIt = function(uncurriedFunc) {
+		var slice = Array.prototype.slice;
+
+		//Store all arguments added, excluding the uncurriedFunc
+		var storedArgs = slice.call(arguments, 1);
+
+		return function() {
+			//Get args of the returned function when it is invoked.
+			var nextArg = slice.call(arguments);
+
+			//Combine args to be passed to the uncurried function.
+			var combinedArgs = storedArgs.concat(nextArg);
+			return uncurriedFunc.apply(null, args);
+		}
+	}
+
+	var partialFunc = curryIt(uncurried, 1); //no console.log yet
+
+	partialFunc(5) //Boom, 2 arguments gotten, console will print "6";
+					</pre>
+					<li>You can curry a function that is already curried.</li>
+					<pre>
+    var uncurried = function(a, b, c) {
+	    console.log(a + b + c);
+	}
+
+	var partialFunc = curryIt(uncurried, 10);
+
+	var partFunc2 = curryIt(partialFunc, 14);
+
+	partFunc2(9); // only 1 more variable needed to get 3 variables.
+					</pre>
+				</ul>
+			</div>
+
+			<h1 class="chapter-header header">Object creation pattern</h1>
+			<div class="text-container">
+				<h4 class="sub-chapter-header header">Namespace pattern</h4>
+				<ul>
+					<li>Reduces the number of globals</li>
+					<li>Avoid namespace collision</li>
+					<li>Done by creating an "all-in-one" object with all the required methods and properties</li>
+					<pre>
+    var MYAPP = {};
+    MYAPP.name = "superObject";
+    MYAPP.expand = function() {
+	    console.log("EXPANDS!!!");
+	}
+
+	//instead of 
+	var name = "superObject",
+		expand = function() {
+			console.log("EXPANDS");
+		};
+
+					</pre>
+					<li>However, as the application grows and the object gets more nested and bigger, amount of code required to download also gets bigger</li>
+					<li>Modifying one area of that object will modify the whole object</li>
+					<li>Hard to keep track of existing namespace within the object, may accidentally override existing data</li>
+					<li>A namespace function is needed to makesure you do not override the exising data</li>
+					<pre>
+    MYAPP.createNewName = function(nameString) {
+	    var names = nameString.split("."),
+	    	parent = MYAPP;
+
+	    if(names[0] === "MYAPP") {
+		    names = names.slice(1);
+		}
+
+		for(var i = 0, max = names.length; i < max; i++) {
+			if(parent[names[i]] === undefined) {
+				parent[names[i]] = {} //Create new empty object at that level, if it does not exist.
+			}
+
+			parent = parent[names[i]]; //Move on to the next nest level.
+		}
+
+		return parent;
+	}
+
+	MYAPP.creatNewName("nest.ed.properties.like.mad"); //works
+	MYAPP.creatNewName("MYAPP.nest.ed.properties.like.mad"); //works too
+
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Declaring dependencies</h4>
+				<ul>
+					<li>Declaring and storing dependencies into variables first before using them</li>
+					<li>Improves performance as you "cache" the data first.</li>
+					<li>Works best when using properties in large objects such as DOM</li>
+					<pre>
+    var liTags = document.getElementsByTagName("li");
+
+    //Do things with liTags....
+					</pre>
+					<li>Also, Variables can be minified while objects are not, to prevent breaking the program</li>
+					<li>Therefore storing the object in a variable is a good idea</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Private properties and privileged methods</h4>
+				<ul>
+					<li>There is no special syntax to make sure properties are public of private in Javascript</li>
+					<li>But careful scoping can allow that to happen.</li>
+					<pre>
+
+    //Using constructors
+
+    function Person() {
+	    var name = "wooooan"; //private member, non accessible through object created.
+
+	    this.getName = function() { //Privileged method, privileged as it can access to the private member.
+		    return name;
+		} 
+	}
+
+	var newGuy = new Person();
+	console.log(newGuy.name) //undefined
+
+
+
+	//Using object literals and immediate function
+
+	var myObj = (function() {
+		var name = "woooan";
+
+		return {
+			getName: function() {
+				return name;
+			}
+		}
+	}());
+					</pre>
+					<li>However, note that the privileged method is still exposed, and name can still be obtained.</li>
+					<li>Private members and privileged function can also be added to the <code>prototype</code> object of a constructor.</li>
+					<pre>
+    Person.prototype = (function() {
+	    var secret ="blablabla";
+
+	    return {
+		    getSecret: function() {
+			    return secret;
+			}
+		}
+	}());
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Privacy failure</h4>
+				<ul>
+					<li>Privacy failure occurs when the private properties can be modified despite careful scoping</li>
+					<li>This occurs when returning an Array or an Object, which are passed by reference in javascript</li>
+					<pre>
+    function Product() {
+	    var specs = {
+		    price: 123,
+		    height: 12,
+		    width: 343
+		};
+
+		this.getSpecs = function() {
+			return specs; //Passed by reference!!
+		}
+	}
+
+	var thing = new Product();
+
+	thingSpecs = thing.getSpecs();
+	thingSpecs.price = 10; //reassign the price.
+
+	thingsNewSpecs = thing.getSpecs();
+	console.log(thingsNewSpecs.price); // 10, instead of 123
+
+					</pre>
+					<li>To deal with this issue, simply avoid passing object or array</li>
+					<li>If really needed, then only expose the data they need to know</li>
+					<li>ORRR pass a copy of that array or object</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Reavealing private functions as public methods</h4>
+				<ul>
+					<li>Simply put, it means allowing a function to be exposed to public by assigning it to a public property.</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Module Pattern</h4>
+				<ul>
+					<li>Outdated? Javascript is able to support modules now</li>
+					<li>But module pattern simply means having a child object in the main object, that hold all the code responsible for certain things</li>
+					<li>e.g. <code>MYAPP.ultilities</code> hold all ultility functions, <code>MYAPP.login</code> hold all login functions.</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Revealing module patterns</h4>
+				<ul>
+					<li>Simply means revealing the parts of the modules that your wish you reveal</li>
+					<pre>
+    MYAPP.ultilities.clean = (function(){
+
+	    //dependencies declaration
+	    var vaccuum = MYAPP.tools.vaccuum,
+	    	mop = MYAPP.tools.mop,
+	    	navigator = MYAPP.tools.navigator;
+
+
+	    //private method
+	    function cleanRoom() {
+		    navigator("room");
+		    vaccuum();
+		    mop();
+		}
+
+		//revealing public API
+		return {
+			cleanRoom: cleanRoom
+		}
+	}());						
+					</pre>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Modules that creates constructor</h4>
+				<ul>
+					<li>Means that the module itself is a constructor.</li>
+					<li>e.g. MYAPP.ultilities.Array is an array constructor.</li>
+					<li>Acheived by capturing the constructor created and return by an immediate function</li>
+				</ul>
+
+				<h4 class="sub-chapter-header header">Importing globals into modules</h4>
+				<ul>
+					<li>Sometimes, modules required the global object.</li>
+					<li>To allow the code in the immediate function that initialises the module to have access to global object, simply allow the immediate function to accept parameters, and pass the global object to the immediate function.</li>
+					<pre>
+    MYAPP.ultilities.needGlobal = (function(app, global){
+	    //Do things...
+	}(MYAPP, this));
+					</pre>
+				</ul>
+
+			</div>
+
+		</div>
+
+		<!--Content page generation and auto update chapter display when scrolling-->
+		<script type="text/javascript">
+			var	chapterHeaders = document.getElementsByClassName("header"),
+				chapterDisplayUpdate = chapterDisplayOnScroll();
+
+			(function initContentPage() {
+				var contentPage = document.getElementById("content-page"),
+					chapterLinkTag,
+					chapterLi,
+					header,
+					chapterTitle,
+					numberOfChapters,
+					latestChapter,
+					subChapterContentList;
+
+				//Set href for a tags in content page, use the textContent as seed.
+				if(chapterHeaders[0]) {
+
+					for(var i = 0, max = chapterHeaders.length; i < max; i++) {
+						//Create generic li tag and a tag
+						chapterLi = document.createElement("li");
+						chapterLinkTag = document.createElement("a");
+
+						//Capture headee and assign title to a tag
+						header = chapterHeaders[i];
+						chapterLinkTag.textContent = header.textContent;
+
+						//generate id
+						chapterTitle = header.textContent.replace(/[^a-z]/gi, "-").toLowerCase();
+
+						//Generate and match id on header with href in a tag
+						header.setAttribute("id", chapterTitle);
+						chapterLinkTag.setAttribute("href", "#" + chapterTitle);
+
+						//Ready to use li tag
+						chapterLi.appendChild(chapterLinkTag);
+
+						//check if it is main chapter header/ sub chapter header
+						if(header.getAttribute("class").split(" ").indexOf("chapter-header") > -1){
+							//ol tag is contentPage, can just append.
+							contentPage.appendChild(chapterLi);
+
+
+						} else if(header.getAttribute("class").split(" ").indexOf("sub-chapter-header") > -1) {
+							//Get length of chapter, to be used for indexing
+							numberOfChapters = contentPage.childNodes.length;
+							//Get the latest chapter's li tag
+							latestChapter = contentPage.childNodes[numberOfChapters - 1];
+							//Attempt to capture the ul tag in the chapter li tag
+							subChapterContentList = latestChapter.getElementsByTagName("ul")[0];
+
+							//If ul tag do not already exist, create one. This happens when it is the first sub chapter added.
+							if(subChapterContentList === undefined || subChapterContentList === null ) {
+								subChapterContentList = document.createElement("ul");
+
+								//Add ready to use li tag to ul tag, then to chapter li.
+								subChapterContentList.appendChild(chapterLi);
+
+								latestChapter.appendChild(subChapterContentList);
+							} else {
+								subChapterContentList.appendChild(chapterLi);
+							}
+
+						}						
+					}
+				}
+			}());
+
+
+			//Auto update chapter display when scrolling
+			document.body.setAttribute("onscroll", "chapterDisplayUpdate()");
+
+
+
+			function chapterDisplayOnScroll() {
+				var scrollDistance,
+					chapterDisplay = document.getElementById("chapter-display"),
+					chapterAhead,
+					chapterBehind,
+					currentChapter,
+					breadCrumbRoot,
+					chapterHeaderLength,
+					mainChapterHeadersLength,
+					mainChapterHeaders = [];
+
+				for(var i = 0, max = chapterHeaders.length; i < max; i++) {
+					if(chapterHeaders[i].getAttribute("class").split(" ").indexOf("chapter-header") > -1) {
+						mainChapterHeaders.push(chapterHeaders[i]);
+					}
+				}
+
+				return function(){
+					scrollDistance = document.body.scrollTop || document.documentElement.scrollTop;
+					chapterHeaderLength = chapterHeaders.length;
+					mainChapterHeadersLength = mainChapterHeaders.length;
+
+					if( chapterHeaderLength > 1) {
+						for(var i = 1; i < chapterHeaderLength; i++) {
+
+							//Breadcrumb child
+							chapterAhead = chapterHeaders[i - 1];
+							chapterBehind = chapterHeaders[i];
+
+							if(scrollDistance > chapterAhead.offsetTop - 50 && scrollDistance < chapterBehind.offsetTop - 50) {
+								currentChapter = chapterAhead;
+
+							} else if ( i === chapterHeaderLength - 1 && scrollDistance > chapterBehind.offsetTop - 50) {
+								currentChapter = chapterBehind;
+							}
+
+						} 
+
+					} else {
+						chapterDisplay.textContent = chapterHeaders[0].textContent;
+					}
+
+					if(mainChapterHeadersLength > 1) {
+						for(var i = 1; i < mainChapterHeadersLength; i++) {
+
+							//Breadcrumb root
+							mainChapterAhead = mainChapterHeaders[i - 1];
+							mainChapterBehind = mainChapterHeaders[i];
+
+							if(scrollDistance > mainChapterAhead.offsetTop - 50 && scrollDistance < mainChapterBehind.offsetTop - 50) {
+								breadCrumbRoot = mainChapterAhead.textContent;
+
+							} else if( i === mainChapterHeadersLength - 1 && scrollDistance > mainChapterBehind.offsetTop - 50) {
+								breadCrumbRoot = mainChapterBehind.textContent;
+							}
+						} 
+					} else {
+						breadCrumbRoot = mainChapterHeaders[0].textContent;
+					}
+
+					//Display after getting breadcrumb content.
+					chapterDisplay.textContent = breadCrumbRoot + "/" + currentChapter.textContent;
+				}
+			}
+
+		</script>
+
+	</body>
+</html>
